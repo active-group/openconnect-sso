@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 
 import attr
 import pkg_resources
+import logging
 import structlog
 
 from PyQt5.QtCore import QUrl, QTimer, pyqtSlot, Qt
@@ -19,8 +20,25 @@ from openconnect_sso import config
 
 app = None
 profile = None
+
 logger = structlog.get_logger("webengine")
 
+structlog.configure(
+    processors=[
+        structlog.stdlib.add_log_level,
+        structlog.stdlib.add_logger_name,
+        structlog.processors.format_exc_info,
+        structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
+    ],
+    logger_factory=structlog.stdlib.LoggerFactory(),
+)
+
+formatter = structlog.stdlib.ProcessorFormatter(
+    processor=structlog.dev.ConsoleRenderer()
+)
+
+handler = logging.StreamHandler()
+handler.setFormatter(formatter)
 
 @attr.s
 class Url:
